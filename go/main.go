@@ -44,5 +44,5 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	w.Write(ipAddress)
+	w.Write([]byte(ipAddress))
 }
