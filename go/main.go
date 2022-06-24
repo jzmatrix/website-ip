@@ -6,38 +6,52 @@ import (
 	"strings"
 	"fmt"
 
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"github.com/gorilla/mux"
 )
 
+
 func main() {
+	// Declare a new router
+	r := mux.NewRouter()
 
-	e := echo.New()
+	// This is where the router is useful, it allows us to declare methods that
+	// this path will be valid for
+	r.HandleFunc("/", rootHandler).Methods("GET")
+	r.HandleFunc("/ping", pingHandler).Methods("GET")
 
-	e.Use(middleware.Logger())
-	e.Use(middleware.Recover())
+	// We can then pass our router (after declaring all our routes) to this method
+	// (where previously, we were leaving the second argument as nil)
+	http.ListenAndServe(":80", r)
+}
 
-	e.GET("/", func(c echo.Context) error {
-		htmlMessage := "Hello, Docker!"
+func pingHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w,  "OK")
+}
 
-		fmt.Println()
-    	for _, e := range os.Environ() {
-	        pair := strings.SplitN(e, "=", 2)
-			// 	# fmt.Println(pair[0])
-			htmlMessage = htmlMessage + "<p>" + pair[0] + " :: " + pair[1] + " :: " + e
-    	}
-		// return c.HTML(http.StatusOK, "Hello, Docker! <3")
-		return c.HTML(http.StatusOK, htmlMessage)
-	})
 
-	e.GET("/ping", func(c echo.Context) error {
-		return c.JSON(http.StatusOK, struct{ Status string }{Status: "OK"})
-	})
+func rootHandler(w http.ResponseWriter, r *http.Request) {
+	//
+	ipAddress := r.RemoteAddr
+	fwdAddress := r.Header.Get("X-Forwarded-For") // capitalisation doesn't matter
+	if fwdAddress != "" {
+		// Got X-Forwarded-For
+		ipAddress = fwdAddress // If it's a single IP, then awesome!
 
-	httpPort := os.Getenv("HTTP_PORT")
-	if httpPort == "" {
-		httpPort = "80"
+		// If we got an array... grab the first IP
+		ips := strings.Split(fwdAddress, ", ")
+		if len(ips) > 1 {
+			ipAddress = ips[0]
+		}
+	}
+	//
+	htmlMessage := "Hello, Docker!"
+
+	fmt.Println()
+	for _, e := range os.Environ() {
+		pair := strings.SplitN(e, "=", 2)
+		// 	# fmt.Println(pair[0])
+		htmlMessage = htmlMessage + "<p>" + pair[0] + " :: " + pair[1] + " :: " + e + " :: " + ipAddress + " :: " + fwdAddress
 	}
 
-	e.Logger.Fatal(e.Start(":" + httpPort))
+	fmt.Fprintf(w, htmlMessage)
 }
