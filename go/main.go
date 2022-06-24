@@ -18,6 +18,7 @@ func main() {
 	// this path will be valid for
 	r.HandleFunc("/", rootHandler).Methods("GET")
 	r.HandleFunc("/ping", pingHandler).Methods("GET")
+	http.Handle("/", r)
 
 	// We can then pass our router (after declaring all our routes) to this method
 	// (where previously, we were leaving the second argument as nil)
@@ -44,7 +45,7 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	//
-	htmlMessage := "Hello, Docker!"
+	/* htmlMessage := "Hello, Docker!"
 
 	fmt.Println()
 	for _, e := range os.Environ() {
@@ -52,6 +53,7 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 		// 	# fmt.Println(pair[0])
 		htmlMessage = htmlMessage + "<p>" + pair[0] + " :: " + pair[1] + " :: " + e + " :: " + ipAddress + " :: " + fwdAddress
 	}
+	*/
 
-	fmt.Fprintf(w, htmlMessage)
+	fmt.Fprintf(w, ipAddress)
 }
