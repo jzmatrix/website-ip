@@ -4,38 +4,11 @@ import (
 	"net/http"
 	"strings"
 	"fmt"
-	"log"
+
+	"github.com/gorilla/mux"
 )
 
-func main() {
 
-    http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-
-		ipAddress := r.RemoteAddr
-		fwdAddress := r.Header.Get("X-Forwarded-For") // capitalisation doesn't matter
-		if fwdAddress != "" {
-			// Got X-Forwarded-For
-			ipAddress = fwdAddress // If it's a single IP, then awesome!
-
-			// If we got an array... grab the first IP
-			ips := strings.Split(fwdAddress, ", ")
-			if len(ips) > 1 {
-				ipAddress = ips[0]
-			}
-		}
-
-        fmt.Fprintf(w, ipAddress)
-    })
-
-    http.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request){
-        fmt.Fprintf(w, "OK")
-    })
-
-    log.Fatal(http.ListenAndServe(":80", nil))
-
-}
-
-/*
 func main() {
 	// Declare a new router
 	r := mux.NewRouter()
@@ -73,4 +46,3 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Write([]byte(ipAddress))
 }
-*/
