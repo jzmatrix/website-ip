@@ -43,11 +43,6 @@ jobs:
           command: |
             docker login --username ${DOCKER_USERNAME} -p "${DOCKER_PASSWORD}"
       - run:
-          name: Load Docker image layer cache
-          command: |
-            set +o pipefail
-            docker load -i /caches/app.tar | true
-      - run:
           name: Build application Docker image
           command: |
             TS=`cat /tmp/timestamp`
@@ -55,14 +50,7 @@ jobs:
             ##
             docker build --cache-from=app  -t ${IMAGE_REPO}/${IMAGE_NAME}:$TS -t ${IMAGE_REPO}/${IMAGE_NAME}:latest .
             ##
-            mkdir -p /caches
-            docker save -o /caches/app.tar ${IMAGE_REPO}/${IMAGE_NAME}:latest
-            ##
             docker push ${IMAGE_REPO}/${IMAGE_NAME}:$TS
             docker push ${IMAGE_REPO}/${IMAGE_NAME}:latest
             ##
             helm upgrade ${IMAGE_NAME} Helm/ --set serviceURL="${SERVICE_URL}",serviceName="${SERVICE_NAME}",namespace="${SERVICE_NAMESPACE}",image.repository="${IMAGE_REPO}",image.name="${IMAGE_NAME}",image.tag=$TS
-      - save_cache:
-          key: v1-{{ .Branch }}-{{ epoch }}
-          paths:
-            - /caches/app.tar
