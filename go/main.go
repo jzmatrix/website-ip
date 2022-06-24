@@ -43,16 +43,6 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 			ipAddress = ips[0]
 		}
 	}
-	//
-	/* htmlMessage := "Hello, Docker!"
 
-	fmt.Println()
-	for _, e := range os.Environ() {
-		pair := strings.SplitN(e, "=", 2)
-		// 	# fmt.Println(pair[0])
-		htmlMessage = htmlMessage + "<p>" + pair[0] + " :: " + pair[1] + " :: " + e + " :: " + ipAddress + " :: " + fwdAddress
-	}
-	*/
-
-	fmt.Fprintf(w, ipAddress)
+	w.Write(ipAddress)
 }
